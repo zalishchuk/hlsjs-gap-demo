@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.15/hls.js"></script>
+  </head>
+  <body style="background-color: #1a1a1a">
+    <video
+      style="max-width: 720px; width: 100%"
+      controls
+      autoplay
+      muted
+    ></video>
+    <script>
+      const video = document.querySelector('video');
+      const hls = new Hls({
+        autoStartLoad: false,
+        debug: true,
+        fragLoadPolicy: {
+          default: {
+            maxTimeToFirstByteMs: 10000,
+            maxLoadTimeMs: 120000,
+            timeoutRetry: {
+              maxNumRetry: 4,
+              retryDelayMs: 0,
+              maxRetryDelayMs: 0,
+            },
+            errorRetry: {
+              maxNumRetry: 2,
+              retryDelayMs: 1000,
+              maxRetryDelayMs: 8000,
+            },
+          },
+        },
+      });
+
+      hls.loadSource('/public/stream.m3u8');
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.log(event, data);
+        if (data.details !== Hls.ErrorDetails.FRAG_LOAD_ERROR) return;
+        if (!data.fatal) return;
+        console.log('Setting Fragment as a GAP', data.frag);
+        data.frag.gap = true;
+        data.frag.tagList.unshift(['GAP']);
+        hls.startLoad();
+      });
+
+      hls.attachMedia(video);
+      hls.startLoad();
+    </script>
+  </body>
+</html>
