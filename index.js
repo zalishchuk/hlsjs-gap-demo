@@ -6,12 +6,7 @@ const app = express();
 const ENABLE_FRAG_LOAD_ERROR_TEST = true;
 const ENABLE_FRAG_PARSING_ERROR_TEST = false;
 
-// Will be handled well.
-// const targetFragmentsList = ['/5.ts', '/6.ts'];
-
-// Two fragments will be gapped, but the third one (7.ts) will not trigger
-// the retry policy, so the fatal error will not happen and buffer will stall.
-const targetFragmentsList = ['/5.ts', '/6.ts', '/7.ts'];
+const targetFragmentsList = ['/7.ts'];
 
 app.use('/public', (req, res, next) => {
   if (ENABLE_FRAG_LOAD_ERROR_TEST && targetFragmentsList.includes(req.url)) {

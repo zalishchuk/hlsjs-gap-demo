@@ -16,40 +16,36 @@
     <script>
       const video = document.querySelector('video');
       const hls = new Hls({
-        autoStartLoad: false,
         debug: true,
-        fragLoadPolicy: {
-          default: {
-            maxTimeToFirstByteMs: 10000,
-            maxLoadTimeMs: 120000,
-            timeoutRetry: {
-              maxNumRetry: 4,
-              retryDelayMs: 0,
-              maxRetryDelayMs: 0,
-            },
-            errorRetry: {
-              maxNumRetry: 2,
-              retryDelayMs: 1000,
-              maxRetryDelayMs: 8000,
-            },
-          },
-        },
+        // Uncomment this to save your time on debugging
+        // fragLoadPolicy: {
+        //   default: {
+        //     maxTimeToFirstByteMs: 10000,
+        //     maxLoadTimeMs: 120000,
+        //     timeoutRetry: {
+        //       maxNumRetry: 4,
+        //       retryDelayMs: 0,
+        //       maxRetryDelayMs: 0,
+        //     },
+        //     errorRetry: {
+        //       maxNumRetry: 2,
+        //       retryDelayMs: 1000,
+        //       maxRetryDelayMs: 500,
+        //     },
+        //   },
+        // },
+      });
+
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        switch (data.details) {
+          case Hls.ErrorDetails.FRAG_LOAD_ERROR:
+            console.log('[FRAG_LOAD_ERROR] Error loading fragment', data);
+            break;
+        }
       });
 
       hls.loadSource('/public/stream.m3u8');
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.log(event, data);
-        if (data.details !== Hls.ErrorDetails.FRAG_LOAD_ERROR) return;
-        if (!data.fatal) return;
-        console.log('Setting Fragment as a GAP', data.frag);
-        data.frag.gap = true;
-        data.frag.tagList.unshift(['GAP']);
-        hls.startLoad();
-      });
-
       hls.attachMedia(video);
-      hls.startLoad();
     </script>
   </body>
 </html>
